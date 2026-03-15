@@ -1,4 +1,4 @@
-import { BrowserRouter, Routes, Route } from "react-router-dom"
+import { HashRouter, Routes, Route } from "react-router-dom"
 
 import Login from "./pages/Login"
 import Dashboard from "./pages/Dashboard"
@@ -11,7 +11,7 @@ function App() {
 
   return (
 
-    <BrowserRouter>
+    <HashRouter>
 
       <Routes>
 
@@ -25,7 +25,7 @@ function App() {
         <Route path="/report" element={<Report />} />
       </Routes>
 
-    </BrowserRouter>
+    </HashRouter>
 
   )
 

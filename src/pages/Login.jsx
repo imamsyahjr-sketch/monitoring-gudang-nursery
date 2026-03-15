@@ -14,25 +14,32 @@ export default function Login() {
 
   const handleLogin = async () => {
 
+    if(!username || !password){
+      alert("Username dan password wajib diisi")
+      return
+    }
+
     try {
 
-      const res = await fetch("http://localhost/api-nursery/login.php",{
-        method:"POST",
-        headers:{
-          "Content-Type":"application/json"
-        },
-        body:JSON.stringify({
-          username: username,
-          password: password
-        })
+      const formData = new FormData()
+      formData.append("username", username)
+      formData.append("password", password)
+
+      const res = await fetch("https://nursery-api-production-2ed3.up.railway.app/login.php",{
+        method: "POST",
+        body: formData
       })
+
+      if(!res.ok){
+        throw new Error("Server tidak merespon")
+      }
 
       const data = await res.json()
 
       if(data.status === "success"){
 
-        // simpan data login
-        localStorage.setItem("user", JSON.stringify(data.user))
+        // simpan status login
+        localStorage.setItem("isLogin","true")
 
         // redirect ke dashboard
         navigate("/dashboard")
@@ -45,8 +52,8 @@ export default function Login() {
 
     } catch (error) {
 
+      console.error(error)
       alert("Server error")
-      console.log(error)
 
     }
 
@@ -58,7 +65,6 @@ export default function Login() {
       <div className="grid md:grid-cols-2 bg-white rounded-2xl shadow-xl overflow-hidden max-w-5xl w-full">
 
         {/* LEFT IMAGE */}
-
         <div className="hidden md:flex items-center justify-center bg-green-50 p-8">
           <img
             src={greenhouse}
@@ -68,7 +74,6 @@ export default function Login() {
         </div>
 
         {/* LOGIN FORM */}
-
         <motion.div
           initial={{ opacity: 0, y: 40 }}
           animate={{ opacity: 1, y: 0 }}
@@ -85,11 +90,10 @@ export default function Login() {
           </p>
 
           {/* USERNAME */}
-
           <div className="mb-5">
 
             <label className="text-sm text-gray-600">
-              Username atau Email
+              Username
             </label>
 
             <input
@@ -103,8 +107,7 @@ export default function Login() {
           </div>
 
           {/* PASSWORD */}
-
-          <div className="mb-4">
+          <div className="mb-6">
 
             <label className="text-sm text-gray-600">
               Kata Sandi
@@ -122,52 +125,26 @@ export default function Login() {
 
               <button
                 type="button"
-                onClick={() => setShowPassword(!showPassword)}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-green-600"
+                onClick={()=>setShowPassword(!showPassword)}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500"
               >
-
                 {showPassword ? (
-                  <EyeSlashIcon className="w-5 h-5" />
+                  <EyeSlashIcon className="w-5 h-5"/>
                 ) : (
-                  <EyeIcon className="w-5 h-5" />
+                  <EyeIcon className="w-5 h-5"/>
                 )}
-
               </button>
 
             </div>
 
           </div>
 
-          {/* REMEMBER */}
-
-          <div className="flex items-center justify-between mb-6 text-sm">
-
-            <label className="flex items-center gap-2 text-gray-600">
-
-              <input
-                type="checkbox"
-                className="accent-green-600"
-              />
-
-              Remember me
-
-            </label>
-
-            <button className="text-green-600 hover:underline">
-              Lupa kata sandi?
-            </button>
-
-          </div>
-
           {/* LOGIN BUTTON */}
-
           <button
             onClick={handleLogin}
             className="w-full bg-green-600 hover:bg-green-700 text-white py-3 rounded-lg font-semibold transition shadow-md hover:shadow-lg"
           >
-
             Masuk
-
           </button>
 
           <p className="text-center text-sm text-gray-500 mt-6">
