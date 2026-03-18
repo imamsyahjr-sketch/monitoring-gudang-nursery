@@ -2,61 +2,46 @@ import { useState } from "react"
 import { motion } from "framer-motion"
 import { EyeIcon, EyeSlashIcon } from "@heroicons/react/24/outline"
 import { useNavigate } from "react-router-dom"
+import { supabase } from "../supabaseClient"
 import greenhouse from "../assets/images/login-bg.png"
 
 export default function Login() {
 
   const [showPassword, setShowPassword] = useState(false)
-  const [username, setUsername] = useState("")
+  const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
 
   const navigate = useNavigate()
 
   const handleLogin = async () => {
 
-    if(!username || !password){
-      alert("Username dan password wajib diisi")
+    if (!email || !password) {
+      alert("Email dan password wajib diisi")
       return
     }
 
     try {
 
-      const formData = new FormData()
-      formData.append("username", username)
-      formData.append("password", password)
-
-      const res = await fetch("https://nursery-api-production-d8f9.up.railway.app/login.php",{
-        method: "POST",
-        body: formData
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email: email,
+        password: password,
       })
 
-      if(!res.ok){
-        throw new Error("Server tidak merespon")
+      if (error) {
+        alert("Login gagal: " + error.message)
+        return
       }
 
-      const data = await res.json()
+      // simpan status login
+      localStorage.setItem("isLogin", "true")
 
-      if(data.status === "success"){
+      // redirect ke dashboard
+      navigate("/dashboard")
 
-        // simpan status login
-        localStorage.setItem("isLogin","true")
-
-        // redirect ke dashboard
-        navigate("/dashboard")
-
-      }else{
-
-        alert(data.message)
-
-      }
-
-    } catch (error) {
-
-      console.error(error)
-      alert("Server error")
-
+    } catch (err) {
+      console.error(err)
+      alert("Terjadi error")
     }
-
   }
 
   return (
@@ -89,18 +74,18 @@ export default function Login() {
             Monitoring Gudang
           </p>
 
-          {/* USERNAME */}
+          {/* EMAIL */}
           <div className="mb-5">
 
             <label className="text-sm text-gray-600">
-              Username
+              Email
             </label>
 
             <input
-              type="text"
-              value={username}
-              onChange={(e)=>setUsername(e.target.value)}
-              placeholder="Masukkan username"
+              type="email"
+              value={email}
+              onChange={(e)=>setEmail(e.target.value)}
+              placeholder="Masukkan email"
               className="w-full mt-1 p-3 border rounded-lg focus:ring-2 focus:ring-green-400 outline-none"
             />
 
