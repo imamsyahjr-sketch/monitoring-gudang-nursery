@@ -25,7 +25,7 @@ export default function Login() {
       formData.append("username", username)
       formData.append("password", password)
 
-      const res = await fetch("https://nursery-api-production-2ed3.up.railway.app/login.php",{
+      const res = await fetch("https://nursery-api-production-d8f9.up.railway.app/login.php",{
         method: "POST",
         body: formData
       })
