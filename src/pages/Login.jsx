@@ -52,9 +52,7 @@ export default function Login() {
 
             {/* overlay biar tulisan kebaca */}
             <div className="absolute inset-0 bg-black/30 md:hidden flex items-center justify-center">
-              <h1 className="text-white text-xl font-bold">
-                Monitoring Gudang
-              </h1>
+              
             </div>
 
           </div>
