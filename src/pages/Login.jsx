@@ -66,12 +66,11 @@ export default function Login() {
           >
 
             <h2 className="text-2xl md:text-3xl font-bold text-gray-700 mb-2">
-              Nursery Mengkiang
+              Aplikasi Gudang
             </h2>
 
             <p className="text-gray-500 mb-6">
-              Silakan login untuk melanjutkan
-            </p>
+Nursery Mengkiang            </p>
 
             {/* EMAIL */}
             <div className="mb-4">
