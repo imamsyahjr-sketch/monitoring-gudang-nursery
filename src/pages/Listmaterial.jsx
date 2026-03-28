@@ -4,7 +4,9 @@ import DashboardLayout from "../layout/DashboardLayout";
 import { supabase } from "../supabaseClient";
 
 export default function Listmaterial() {
+
   const [materials, setMaterials] = useState([]);
+
   const [search, setSearch] = useState("");
 
   const [editData, setEditData] = useState(null);
@@ -21,11 +23,7 @@ export default function Listmaterial() {
       .select("*")
       .order("id", { ascending: true });
 
-    if (error) {
-      console.error(error);
-    } else {
-      setMaterials(data);
-    }
+    if (!error) setMaterials(data);
   };
 
   const filteredMaterials = materials.filter(
@@ -46,7 +44,7 @@ export default function Listmaterial() {
   };
 
   const handleSave = async () => {
-    const { error } = await supabase
+    await supabase
       .from("materials")
       .update({
         stok: Number(stokEdit),
@@ -54,28 +52,16 @@ export default function Listmaterial() {
       })
       .eq("id", editData.id);
 
-    if (error) {
-      console.error(error);
-    } else {
-      fetchMaterials();
-      setEditData(null);
-    }
+    fetchMaterials();
+    setEditData(null);
   };
 
   const handleDelete = async (id) => {
-    const confirmDelete = confirm("Yakin hapus?");
-    if (!confirmDelete) return;
+    if (!confirm("Yakin hapus?")) return;
 
-    const { error } = await supabase
-      .from("materials")
-      .delete()
-      .eq("id", id);
+    await supabase.from("materials").delete().eq("id", id);
 
-    if (error) {
-      console.error(error);
-    } else {
-      fetchMaterials();
-    }
+    fetchMaterials();
   };
 
   return (
@@ -85,7 +71,7 @@ export default function Listmaterial() {
         {/* HEADER */}
         <div className="flex items-center justify-between mb-4">
           <h2 className="text-xl font-semibold text-gray-800">
-            List Stok Material
+            List Stok Material Nursery Mengkiang
           </h2>
 
           <div className="w-72">
@@ -103,94 +89,135 @@ export default function Listmaterial() {
 
         {/* EDIT FORM */}
         {editData && (
-          <div className="bg-yellow-50 border p-4 rounded mb-4">
-            <h3 className="mb-2 font-semibold">
-              Edit {editData.no_material}
+          <div className="bg-yellow-50 border border-yellow-200 p-4 rounded-lg mb-4">
+            <h3 className="font-semibold text-gray-700 mb-3">
+              Edit Material {editData.no_material}
             </h3>
 
-            <input
-              type="number"
-              value={stokEdit}
-              onChange={(e) => setStokEdit(e.target.value)}
-              className="border p-2 mr-2"
-              placeholder="Stok"
-            />
+            <div className="grid md:grid-cols-2 gap-4">
+              <div>
+                <label className="text-sm text-gray-600">Stok</label>
+                <input
+                  type="number"
+                  value={stokEdit}
+                  onChange={(e)=>setStokEdit(e.target.value)}
+                  className="w-full mt-1 p-2 border rounded-lg"
+                />
+              </div>
 
-            <input
-              type="number"
-              value={stokMinEdit}
-              onChange={(e) => setStokMinEdit(e.target.value)}
-              className="border p-2 mr-2"
-              placeholder="Stok Min"
-            />
+              <div>
+                <label className="text-sm text-gray-600">
+                  Stok Minimum
+                </label>
+                <input
+                  type="number"
+                  value={stokMinEdit}
+                  onChange={(e)=>setStokMinEdit(e.target.value)}
+                  className="w-full mt-1 p-2 border rounded-lg"
+                />
+              </div>
+            </div>
 
-            <button
-              onClick={handleSave}
-              className="bg-green-600 text-white px-3 py-2 mr-2"
-            >
-              Simpan
-            </button>
+            <div className="mt-4 flex gap-3">
+              <button
+                onClick={handleSave}
+                className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg"
+              >
+                Simpan
+              </button>
 
-            <button
-              onClick={() => setEditData(null)}
-              className="bg-gray-400 px-3 py-2"
-            >
-              Batal
-            </button>
+              <button
+                onClick={()=>setEditData(null)}
+                className="bg-gray-300 hover:bg-gray-400 px-4 py-2 rounded-lg"
+              >
+                Batal
+              </button>
+            </div>
           </div>
         )}
 
         {/* TABLE */}
-        <table className="w-full border">
-          <thead className="bg-gray-100">
-            <tr>
-              <th>No</th>
-              <th>No Material</th>
-              <th>Nama</th>
-              <th>Stok</th>
-              <th>Min</th>
-              <th>Aksi</th>
-            </tr>
-          </thead>
+        <div className="bg-white shadow-md rounded-lg overflow-hidden">
+          <div className="overflow-x-auto">
+            <table className="min-w-full text-sm">
+              <thead className="bg-gray-50">
+                <tr>
+                  <th className="px-3 py-2 text-center border-b">No</th>
+                  <th className="px-3 py-2 text-center border-b">
+                    No.Material
+                  </th>
+                  <th className="px-3 py-2 text-center border-b">
+                    Nama Material
+                  </th>
+                  <th className="px-3 py-2 text-center border-b">
+                    Stok
+                  </th>
+                  <th className="px-3 py-2 text-center border-b">
+                    Stok Minimum
+                  </th>
+                  <th className="px-3 py-2 text-center border-b">
+                    Action
+                  </th>
+                </tr>
+              </thead>
 
-          <tbody>
-            {filteredMaterials.map((item, i) => (
-              <tr key={item.id} className="text-center border-t">
-                <td>{i + 1}</td>
-                <td>{item.no_material}</td>
-                <td>{item.nama_material}</td>
-
-                <td
-                  className={
-                    item.stok <= item.stok_min
-                      ? "text-red-500 font-bold"
-                      : ""
-                  }
-                >
-                  {item.stok}
-                </td>
-
-                <td>{item.stok_min}</td>
-
-                <td>
-                  <button
-                    onClick={() => handleEdit(item)}
-                    className="text-blue-600 mr-2"
+              <tbody className="divide-y divide-gray-100">
+                {filteredMaterials.map((item, index) => (
+                  <tr
+                    key={item.id}
+                    className={`group hover:bg-blue-50 transition ${
+                      index % 2 === 0 ? "bg-white" : "bg-gray-50"
+                    }`}
                   >
-                    Edit
-                  </button>
+                    <td className="px-3 py-2 text-center">
+                      {index + 1}
+                    </td>
 
-                  <button
-                    onClick={() => handleDelete(item.id)}
-                    className="text-red-600"
-                  >
-                    Hapus
-                  </button>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+                    <td className="px-3 py-2 text-center">
+                      {item.no_material}
+                    </td>
+
+                    <td className="px-3 py-2 text-center">
+                      {item.nama_material}
+                    </td>
+
+                    <td
+                      className={`px-3 py-2 text-center font-semibold ${
+                        item.stok <= item.stok_min
+                          ? "text-red-500"
+                          : "text-gray-700"
+                      }`}
+                    >
+                      {item.stok}
+                    </td>
+
+                    <td className="px-3 py-2 text-center">
+                      {item.stok_min}
+                    </td>
+
+                    <td className="px-3 py-2 text-center">
+                      <button
+                        onClick={() => handleEdit(item)}
+                        className="text-blue-600 hover:underline text-sm md:opacity-0 md:group-hover:opacity-100 transition"
+                      >
+                        Edit
+                      </button>
+
+                      <button
+                        onClick={() => handleDelete(item.id)}
+                        className="text-red-600 hover:underline text-sm ml-2 md:opacity-0 md:group-hover:opacity-100 transition"
+                      >
+                        Hapus
+                      </button>
+                    </td>
+
+                  </tr>
+                ))}
+              </tbody>
+
+            </table>
+          </div>
+        </div>
 
       </div>
     </DashboardLayout>

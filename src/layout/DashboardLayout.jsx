@@ -8,19 +8,20 @@ export default function DashboardLayout({children}){
 
   return(
 
-    <div className="flex">
+    <div className="flex min-h-screen">
 
       <Sidebar open={openSidebar} setOpen={setOpenSidebar}/>
 
-      <div className="flex-1 bg-gray-100 min-h-screen">
+      <div className="flex flex-col flex-1 bg-gray-100">
 
         <Topbar openSidebar={()=>setOpenSidebar(true)}/>
 
-        <div className="p-6">
+        {/* CONTENT */}
+        <div className="flex-1 p-6">
           {children}
         </div>
 
-     {/* FOOTER */}
+        {/* FOOTER */}
         <footer className="text-center text-sm p-3 border-t border-gray-700">
           © 2026 Inventory Gudang Ns.MKG — Created by 
           <span className="text-G-400"> ImamSyah</span>

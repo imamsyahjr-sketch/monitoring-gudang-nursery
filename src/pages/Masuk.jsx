@@ -3,6 +3,7 @@ import DashboardLayout from "../layout/DashboardLayout";
 import { supabase } from "../supabaseClient";
 
 export default function Masuk() {
+
   const [noMaterial, setNoMaterial] = useState("");
   const [namaMaterial, setNamaMaterial] = useState("");
   const [stok, setStok] = useState("");
@@ -38,50 +39,80 @@ export default function Masuk() {
 
   return (
     <DashboardLayout>
-      <div className="p-6 max-w-md">
 
-        <h2 className="text-xl font-semibold mb-4">
+      <div className="p-6">
+
+        {/* HEADER */}
+        <h2 className="text-xl font-semibold text-gray-800 mb-4">
           Input Material Masuk
         </h2>
 
-        <input
-          placeholder="No Material"
-          value={noMaterial}
-          onChange={(e) => setNoMaterial(e.target.value)}
-          className="w-full border p-2 mb-2"
-        />
+        {/* FORM */}
+        <div className="bg-white shadow-md rounded-lg p-4 max-w-xl">
 
-        <input
-          placeholder="Nama Material"
-          value={namaMaterial}
-          onChange={(e) => setNamaMaterial(e.target.value)}
-          className="w-full border p-2 mb-2"
-        />
+          <div className="grid md:grid-cols-2 gap-4">
 
-        <input
-          type="number"
-          placeholder="Stok"
-          value={stok}
-          onChange={(e) => setStok(e.target.value)}
-          className="w-full border p-2 mb-2"
-        />
+            <div>
+              <label className="text-sm text-gray-600">
+                No Material
+              </label>
+              <input
+                value={noMaterial}
+                onChange={(e) => setNoMaterial(e.target.value)}
+                className="w-full mt-1 p-2 border rounded-lg"
+              />
+            </div>
 
-        <input
-          type="number"
-          placeholder="Stok Minimum"
-          value={stokMin}
-          onChange={(e) => setStokMin(e.target.value)}
-          className="w-full border p-2 mb-4"
-        />
+            <div>
+              <label className="text-sm text-gray-600">
+                Nama Material
+              </label>
+              <input
+                value={namaMaterial}
+                onChange={(e) => setNamaMaterial(e.target.value)}
+                className="w-full mt-1 p-2 border rounded-lg"
+              />
+            </div>
 
-        <button
-          onClick={handleSubmit}
-          className="bg-blue-600 text-white px-4 py-2 rounded"
-        >
-          Simpan
-        </button>
+            <div>
+              <label className="text-sm text-gray-600">
+                Stok
+              </label>
+              <input
+                type="number"
+                value={stok}
+                onChange={(e) => setStok(e.target.value)}
+                className="w-full mt-1 p-2 border rounded-lg"
+              />
+            </div>
+
+            <div>
+              <label className="text-sm text-gray-600">
+                Stok Minimum
+              </label>
+              <input
+                type="number"
+                value={stokMin}
+                onChange={(e) => setStokMin(e.target.value)}
+                className="w-full mt-1 p-2 border rounded-lg"
+              />
+            </div>
+
+          </div>
+
+          <div className="mt-4">
+            <button
+              onClick={handleSubmit}
+              className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg"
+            >
+              Simpan
+            </button>
+          </div>
+
+        </div>
 
       </div>
+
     </DashboardLayout>
   );
 }
