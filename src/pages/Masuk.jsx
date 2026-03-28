@@ -18,6 +18,7 @@ export default function Masuk() {
     fetchHistory();
   }, []);
 
+  // ✅ FIX FILTER TANGGAL
   const fetchHistory = async () => {
     let query = supabase
       .from("material_masuk")
@@ -25,11 +26,11 @@ export default function Masuk() {
       .order("created_at", { ascending: false });
 
     if (dateFrom) {
-      query = query.gte("created_at", dateFrom);
+      query = query.gte("created_at", dateFrom + "T00:00:00");
     }
 
     if (dateTo) {
-      query = query.lte("created_at", dateTo);
+      query = query.lte("created_at", dateTo + "T23:59:59");
     }
 
     const { data, error } = await query;
@@ -37,24 +38,44 @@ export default function Masuk() {
     if (!error) setHistory(data);
   };
 
+  // ✅ STOK OTOMATIS + ANTI DOUBLE
   const handleSubmit = async () => {
 
-    if (!noMaterial || !namaMaterial) {
+    if (!noMaterial || !namaMaterial || !stok) {
       alert("Isi semua field");
       return;
     }
 
-    // insert ke master materials
-    await supabase.from("materials").insert([
-      {
-        no_material: noMaterial,
-        nama_material: namaMaterial,
-        stok: Number(stok),
-        stok_min: Number(stokMin),
-      },
-    ]);
+    // cek material sudah ada atau belum
+    const { data: existing } = await supabase
+      .from("materials")
+      .select("*")
+      .eq("no_material", noMaterial)
+      .single();
 
-    // insert ke histori
+    if (existing) {
+      // update stok (tambah)
+      await supabase
+        .from("materials")
+        .update({
+          stok: existing.stok + Number(stok),
+          stok_min: Number(stokMin) || existing.stok_min,
+        })
+        .eq("id", existing.id);
+
+    } else {
+      // insert baru
+      await supabase.from("materials").insert([
+        {
+          no_material: noMaterial,
+          nama_material: namaMaterial,
+          stok: Number(stok),
+          stok_min: Number(stokMin),
+        },
+      ]);
+    }
+
+    // simpan histori
     await supabase.from("material_masuk").insert([
       {
         no_material: noMaterial,
@@ -63,7 +84,7 @@ export default function Masuk() {
       },
     ]);
 
-    alert("Berhasil tambah material");
+    alert("Berhasil input material");
 
     setNoMaterial("");
     setNamaMaterial("");
