@@ -1,83 +1,94 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Select from "react-select";
 import DashboardLayout from "../layout/DashboardLayout";
+import { supabase } from "../supabaseClient";
 
 export default function Listmaterial() {
-
-  const initialData = Array.from({ length: 100 }, (_, i) => ({
-    id: i + 1,
-    noMaterial: `MAT${String(i + 1).padStart(3, "0")}`,
-    namaMaterial: `Material ${i + 1}`,
-    stok: (i + 1) * 5,
-    stokMin: 20
-  }));
-
-  const [materials, setMaterials] = useState(initialData);
-
+  const [materials, setMaterials] = useState([]);
   const [search, setSearch] = useState("");
 
   const [editData, setEditData] = useState(null);
   const [stokEdit, setStokEdit] = useState("");
   const [stokMinEdit, setStokMinEdit] = useState("");
 
+  useEffect(() => {
+    fetchMaterials();
+  }, []);
+
+  const fetchMaterials = async () => {
+    const { data, error } = await supabase
+      .from("materials")
+      .select("*")
+      .order("id", { ascending: true });
+
+    if (error) {
+      console.error(error);
+    } else {
+      setMaterials(data);
+    }
+  };
 
   const filteredMaterials = materials.filter(
     (item) =>
-      item.noMaterial.toLowerCase().includes(search.toLowerCase()) ||
-      item.namaMaterial.toLowerCase().includes(search.toLowerCase())
+      item.no_material.toLowerCase().includes(search.toLowerCase()) ||
+      item.nama_material.toLowerCase().includes(search.toLowerCase())
   );
 
-
   const options = materials.map((item) => ({
-    value: item.noMaterial,
-    label: `${item.noMaterial} - ${item.namaMaterial}`,
+    value: item.no_material,
+    label: `${item.no_material} - ${item.nama_material}`,
   }));
 
-
   const handleEdit = (item) => {
-
     setEditData(item);
-
     setStokEdit(item.stok);
-
-    setStokMinEdit(item.stokMin);
-
+    setStokMinEdit(item.stok_min);
   };
 
+  const handleSave = async () => {
+    const { error } = await supabase
+      .from("materials")
+      .update({
+        stok: Number(stokEdit),
+        stok_min: Number(stokMinEdit),
+      })
+      .eq("id", editData.id);
 
-  const handleSave = () => {
-
-    const updated = materials.map((item) =>
-
-      item.id === editData.id
-        ? { ...item, stok: Number(stokEdit), stokMin: Number(stokMinEdit) }
-        : item
-    );
-
-    setMaterials(updated);
-
-    setEditData(null);
-
+    if (error) {
+      console.error(error);
+    } else {
+      fetchMaterials();
+      setEditData(null);
+    }
   };
 
+  const handleDelete = async (id) => {
+    const confirmDelete = confirm("Yakin hapus?");
+    if (!confirmDelete) return;
+
+    const { error } = await supabase
+      .from("materials")
+      .delete()
+      .eq("id", id);
+
+    if (error) {
+      console.error(error);
+    } else {
+      fetchMaterials();
+    }
+  };
 
   return (
-
     <DashboardLayout>
-
       <div className="p-6">
 
-
         {/* HEADER */}
-
         <div className="flex items-center justify-between mb-4">
-
           <h2 className="text-xl font-semibold text-gray-800">
-            List Stok Material Nursery Mengkiang
+            List Stok Material
           </h2>
 
           <div className="w-72">
-
             <Select
               options={options}
               placeholder="Cari material..."
@@ -87,183 +98,101 @@ export default function Listmaterial() {
               isClearable
               className="text-sm"
             />
-
           </div>
-
         </div>
-
 
         {/* EDIT FORM */}
-
         {editData && (
-
-          <div className="bg-yellow-50 border border-yellow-200 p-4 rounded-lg mb-4">
-
-            <h3 className="font-semibold text-gray-700 mb-3">
-              Edit Material {editData.noMaterial}
+          <div className="bg-yellow-50 border p-4 rounded mb-4">
+            <h3 className="mb-2 font-semibold">
+              Edit {editData.no_material}
             </h3>
 
-            <div className="grid md:grid-cols-2 gap-4">
+            <input
+              type="number"
+              value={stokEdit}
+              onChange={(e) => setStokEdit(e.target.value)}
+              className="border p-2 mr-2"
+              placeholder="Stok"
+            />
 
-              <div>
+            <input
+              type="number"
+              value={stokMinEdit}
+              onChange={(e) => setStokMinEdit(e.target.value)}
+              className="border p-2 mr-2"
+              placeholder="Stok Min"
+            />
 
-                <label className="text-sm text-gray-600">
-                  Stok
-                </label>
+            <button
+              onClick={handleSave}
+              className="bg-green-600 text-white px-3 py-2 mr-2"
+            >
+              Simpan
+            </button>
 
-                <input
-                  type="number"
-                  value={stokEdit}
-                  onChange={(e)=>setStokEdit(e.target.value)}
-                  className="w-full mt-1 p-2 border rounded-lg"
-                />
-
-              </div>
-
-              <div>
-
-                <label className="text-sm text-gray-600">
-                  Stok Minimum
-                </label>
-
-                <input
-                  type="number"
-                  value={stokMinEdit}
-                  onChange={(e)=>setStokMinEdit(e.target.value)}
-                  className="w-full mt-1 p-2 border rounded-lg"
-                />
-
-              </div>
-
-            </div>
-
-
-            <div className="mt-4 flex gap-3">
-
-              <button
-                onClick={handleSave}
-                className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg"
-              >
-                Simpan
-              </button>
-
-              <button
-                onClick={()=>setEditData(null)}
-                className="bg-gray-300 hover:bg-gray-400 px-4 py-2 rounded-lg"
-              >
-                Batal
-              </button>
-
-            </div>
-
+            <button
+              onClick={() => setEditData(null)}
+              className="bg-gray-400 px-3 py-2"
+            >
+              Batal
+            </button>
           </div>
-
         )}
 
-
         {/* TABLE */}
+        <table className="w-full border">
+          <thead className="bg-gray-100">
+            <tr>
+              <th>No</th>
+              <th>No Material</th>
+              <th>Nama</th>
+              <th>Stok</th>
+              <th>Min</th>
+              <th>Aksi</th>
+            </tr>
+          </thead>
 
-        <div className="bg-white shadow-md rounded-lg overflow-hidden">
+          <tbody>
+            {filteredMaterials.map((item, i) => (
+              <tr key={item.id} className="text-center border-t">
+                <td>{i + 1}</td>
+                <td>{item.no_material}</td>
+                <td>{item.nama_material}</td>
 
-          <div className="overflow-x-auto">
+                <td
+                  className={
+                    item.stok <= item.stok_min
+                      ? "text-red-500 font-bold"
+                      : ""
+                  }
+                >
+                  {item.stok}
+                </td>
 
-            <table className="min-w-full text-sm">
+                <td>{item.stok_min}</td>
 
-              <thead className="bg-gray-50">
-
-                <tr>
-
-                  <th className="px-3 py-2 text-center border-b">No</th>
-
-                  <th className="px-3 py-2 text-center border-b">
-                    No.Material
-                  </th>
-
-                  <th className="px-3 py-2 text-center border-b">
-                    Nama Material
-                  </th>
-
-                  <th className="px-3 py-2 text-center border-b">
-                    Stok
-                  </th>
-
-                  <th className="px-3 py-2 text-center border-b">
-                    Stok Minimum
-                  </th>
-
-                  <th className="px-3 py-2 text-center border-b">
-                    Action
-                  </th>
-
-                </tr>
-
-              </thead>
-
-
-              <tbody className="divide-y divide-gray-100">
-
-                {filteredMaterials.map((item, index) => (
-
-                  <tr
-                    key={item.id}
-                    className={`group hover:bg-blue-50 transition ${
-                      index % 2 === 0 ? "bg-white" : "bg-gray-50"
-                    }`}
+                <td>
+                  <button
+                    onClick={() => handleEdit(item)}
+                    className="text-blue-600 mr-2"
                   >
+                    Edit
+                  </button>
 
-                    <td className="px-3 py-2 text-center">
-                      {index + 1}
-                    </td>
-
-                    <td className="px-3 py-2 text-center">
-                      {item.noMaterial}
-                    </td>
-
-                    <td className="px-3 py-2 text-center">
-                      {item.namaMaterial}
-                    </td>
-
-                    <td
-                      className={`px-3 py-2 text-center font-semibold ${
-                        item.stok <= item.stokMin
-                          ? "text-red-500"
-                          : "text-gray-700"
-                      }`}
-                    >
-                      {item.stok}
-                    </td>
-
-                    <td className="px-3 py-2 text-center">
-                      {item.stokMin}
-                    </td>
-
-
-                    <td className="px-3 py-2 text-center">
-
-                      <button
-                        onClick={() => handleEdit(item)}
-                        className="text-blue-600 hover:underline text-sm md:opacity-0 md:group-hover:opacity-100 transition"
-                      >
-                        Edit
-                      </button>
-
-                    </td>
-
-                  </tr>
-
-                ))}
-
-              </tbody>
-
-            </table>
-
-          </div>
-
-        </div>
+                  <button
+                    onClick={() => handleDelete(item.id)}
+                    className="text-red-600"
+                  >
+                    Hapus
+                  </button>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
 
       </div>
-
     </DashboardLayout>
-
   );
 }
